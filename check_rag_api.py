@@ -16,6 +16,7 @@ fake_graph.invoke.return_value = {
 }
 
 with (
+    patch.dict("os.environ", {"RAG_QUERY_SPLIT_ENABLED": "0", "RAG_QUERY_REWRITE_ENABLED": "0"}),
     patch.object(rag_api, "load_retriever", return_value=test_resources),
     patch.object(rag_api, "build_rag_graph", return_value=fake_graph) as build,
 ):
@@ -39,7 +40,7 @@ with (
         }
 
         fake_graph.invoke.assert_called_once_with({"question": "你好"})
-        build.assert_called_once_with(test_resources)
+        build.assert_called_once_with(test_resources, query_split_enabled=False, query_rewrite_enabled=False)
                 # 模拟图执行过程中模型请求失败
         fake_graph.invoke.side_effect = rag_api.ModelRequestError(
             "测试用模型故障"
@@ -53,4 +54,12 @@ with (
         # 单次问答失败后，服务仍然能够响应健康检查
         assert client.get("/health").status_code == 200
 
-print("接口检查通过：正常请求、输入校验、模型故障转换均符合预期")
+with (
+    patch.dict("os.environ", {"RAG_QUERY_SPLIT_ENABLED": "1", "RAG_QUERY_REWRITE_ENABLED": "1"}),
+    patch.object(rag_api, "load_retriever", return_value=test_resources),
+    patch.object(rag_api, "build_rag_graph", return_value=fake_graph) as build,
+):
+    with TestClient(rag_api.app):
+        build.assert_called_once_with(test_resources, query_split_enabled=True, query_rewrite_enabled=True)
+
+print("接口检查通过：正常请求、输入校验、模型故障转换和 V1 开关均符合预期")

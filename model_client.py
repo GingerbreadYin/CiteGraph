@@ -13,7 +13,9 @@ class ModelRequestError(RuntimeError):
     """向调用方报告模型请求失败。"""
 
 
-def call_deepseek(payload):
+def call_deepseek(payload, *, max_attempts=3):
+    if max_attempts < 1:
+        raise ValueError("max_attempts 必须至少为 1")
     load_dotenv(Path(__file__).parent / ".env")
     api_key = os.environ.get("DEEPSEEK_API_KEY")
 
@@ -30,7 +32,6 @@ def call_deepseek(payload):
         method="POST",
     )
 
-    max_attempts = 3
     retryable_codes = {429, 500, 502, 503, 504}
 
     for attempt in range(max_attempts):

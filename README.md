@@ -96,6 +96,46 @@ uv pip install --python .\.venv-rag\Scripts\python.exe -r requirements-rag.txt
 
 先安装记录的 CPU 版 PyTorch，再恢复其余依赖。公开模型首次运行时会下载并缓存至 .model-cache；下载失败应保留完整输出定位，不反复重装。
 
+## V5 混合检索与重排
+
+设置 `$env:RAG_RETRIEVAL_MODE` 后重启 API：
+
+| 值 | 检索流程 |
+|---|---|
+| `vector`（默认） | 向量检索 |
+| `hybrid` | 向量与 BM25 各取最多六条政策，按 RRF（k=60）融合 |
+| `rerank` | 融合后用本地 `BAAI/bge-reranker-base` 重排前六条 |
+
+BM25 使用 jieba 分词，索引在启动时构建。重排模型可复用 `RAG_RERANKER_CACHE_DIR` 指向的 Hugging Face 缓存，默认使用项目的 `.model-cache`。启用 V3 时，向量子句先映射为去重的父小节，再与 BM25 的小节排名融合。首轮与补检仍使用原政策编号和上下文块数。
+
+## V4 ONNX 向量推理（实验开关）
+
+可选依赖为 `onnx`（导出）和 `onnxruntime`（推理）。安装后运行
+`python export_onnx.py bge-small-zh-v1.5.onnx`，使用本地已缓存的 BGE 权重。
+然后设置 `$env:RAG_ONNX_MODEL_PATH = "模型文件的绝对路径"` 并重启 API。
+文件必须由同一 BGE 模型和权重导出。服务仍使用原索引和分词配置，编码改由
+ONNX Runtime 的 CPU 后端执行。移除该变量并重启可切回 PyTorch。
+
+## V3 父子切片（实验开关）
+
+设置 `$env:RAG_PARENT_CHILD_ENABLED = "1"` 并重启 API 可启用。启动时将原政策小节切成带小节标题的句子，建立内存索引。按子句向量打分，按首次命中顺序去重并带回完整小节，沿用原小节编号和引用。原索引文件仍用于默认模式。前两块、补检前四块的限制按父小节计算。
+
+## V2 查询改写补检（实验开关）
+
+设置 `$env:RAG_QUERY_REWRITE_ENABLED = "1"` 并重启 API 可启用。仅在首轮判定需要补检且 V1 未引入新证据时，尝试一次查询改写。改写只用于搜索，证据检查和回答仍使用原问题。无效改写和检索失败沿用原排序。两种补检可各产生一次模型调用，总轮数仍为两轮。
+
+## V1 查询拆分补检（实验开关）
+
+默认仍使用原排序从前 2 块扩到前 4 块。仅在测试环境明确设置
+`$env:RAG_QUERY_SPLIT_ENABLED = "1"` 并重启 API，才启用 V1。
+关闭时将其设为 `"0"` 或移除后重启。
+
+启用后，只有首轮证据检查返回 `NEED_RETRIEVAL` 才额外请求模型拆分一次，
+不自动重试。子查询使用现有本地检索；合并时保留首轮候选，去重，
+拆分候选最多 4 块、正文最多 1800 字符。拆分不可用、子查询检索失败
+或没有带回新块时，使用原排序补检。随后仍进行原有的第二轮证据检查。
+`final_answer_usage` 仍只统计最终生成调用，不含拆分或证据检查。
+
 ## 接口含义
 
 HTTP 200 表示流程正常完成，业务结果看 status：DIRECT、ANSWERED、NEED_CLARIFICATION 或 INSUFFICIENT_EVIDENCE。

@@ -1,3 +1,4 @@
+import logging
 from typing import TypedDict
 from citations import validate_citations
 
@@ -5,8 +6,13 @@ from langgraph.graph import StateGraph, START, END
 
 from router import route_question
 from retrieval import rank_chunks, format_evidence
-from evidence import check_evidence
+from evidence import InvalidEvidenceOutputError, check_evidence
 from generation import generate_answer
+from query_split import expand_with_query_split
+from query_rewrite import expand_with_query_rewrite
+
+
+logger = logging.getLogger(__name__)
 
 
 class RagState(TypedDict, total=False):
@@ -22,7 +28,7 @@ class RagState(TypedDict, total=False):
     final_answer_usage: dict | None
 
 
-def build_rag_graph(resources):
+def build_rag_graph(resources, *, query_split_enabled=False, query_rewrite_enabled=False):
     def route_node(state):
         print("执行节点：route")
         question = state["question"].strip()
@@ -56,13 +62,26 @@ def build_rag_graph(resources):
 
     def check_node(state):
         print(f"执行节点：check，第 {state['rounds']} 轮")
-        assessment = check_evidence(state["question"], state["evidence"])
+        try:
+            assessment = check_evidence(state["question"], state["evidence"])
+        except InvalidEvidenceOutputError as error:
+            logger.warning("证据检查输出无效 round=%s reason=%s", state["rounds"], error.reason)
+            raise
         print("检查结果：", assessment["status"], assessment["reason"])
         return {"assessment": assessment}
 
     def expand_node(state):
         print("执行节点：expand")
-        selected = state["ranked_chunks"][:4]
+        ranked = state["ranked_chunks"]
+        def retrieve(query):
+            return rank_chunks(query, resources)
+
+        baseline = ranked[:4]
+        selected = baseline
+        if query_split_enabled:
+            selected = expand_with_query_split(state["question"], ranked, retrieve)
+        if query_rewrite_enabled and selected == baseline:
+            selected = expand_with_query_rewrite(state["question"], ranked, retrieve)
         return {
             "selected_chunks": selected,
             "evidence": format_evidence(selected),

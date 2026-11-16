@@ -1,5 +1,7 @@
 import hashlib
 import json
+import os
+import re
 from pathlib import Path
 
 import torch
@@ -32,11 +34,34 @@ def load_retriever():
         cache_folder=str(project_dir / ".model-cache"),
     )
 
+    onnx_path = os.getenv("RAG_ONNX_MODEL_PATH")
+    if onnx_path:
+        from onnx_encoder import OnnxEncoder
+
+        model = OnnxEncoder(onnx_path, model.tokenizer, model.max_seq_length)
     return {
         "chunks": chunks,
         "model": model,
         "vectors": index["vectors"],
     }
+
+
+def with_parent_child_index(resources):
+    """Build an in-memory sentence index pointing to the original policy sections."""
+    children = []
+    for parent_index, parent in enumerate(resources["chunks"]):
+        text = parent["text"].strip()
+        lines = text.splitlines()
+        body = "\n".join(lines[1:]).strip() if lines and lines[0].startswith("## ") else text
+        sentences = re.split(r"(?<=[。！？；])\s*|\n+", body)
+        for sentence in (part.strip() for part in sentences if part.strip()):
+            children.append((parent_index, f"{parent['section']}\n{sentence}"))
+        if not body:
+            children.append((parent_index, f"{parent['section']}\n{text}"))
+    if not children:
+        return resources
+    vectors = resources["model"].encode([text for _, text in children], convert_to_tensor=True)
+    return {**resources, "search_chunks": children, "vectors": vectors}
 
 
 def rank_chunks(question, resources):
@@ -46,7 +71,17 @@ def rank_chunks(question, resources):
     scores = util.cos_sim(query_vector, resources["vectors"])[0]
     indices = scores.argsort(descending=True)
 
-    return [resources["chunks"][int(index)] for index in indices]
+    if "search_chunks" in resources:
+        children = resources["search_chunks"]
+        ranked = list(dict.fromkeys(children[int(index)][0] for index in indices))
+    else:
+        ranked = [int(index) for index in indices]
+
+    if "bm25" in resources:
+        from hybrid_retrieval import rank_hybrid
+
+        ranked = rank_hybrid(question, ranked, resources)
+    return [resources["chunks"][index] for index in ranked]
 
 
 def format_evidence(chunks):

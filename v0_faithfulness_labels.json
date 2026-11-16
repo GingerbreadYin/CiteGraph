@@ -1,0 +1,248 @@
+{
+  "method": "Codex 按历史回答的不同政策结论人工标注，重复结论合并。只评估已写出的结论是否得到本轮候选支持；不把缺答算入忠实度。",
+  "source_sha256": {
+    "chunks.json": "d27e34c9163c80ae478a55f02d2c5e5f08bd3ea4e9d523d72edd0fe03e62e70d",
+    "e2e_report_e2e_cases.json": "630f754d33d83f74d60f622c7c897f296868ac0222c4ac78a8068c8980e2af5d",
+    "e2e_report_e2e_invoice_cases.json": "709a1dc7e792a9a6f9a76b772d31f0de8cb691ffd957aa90beb0ab04f33ecd79"
+  },
+  "claims_by_case": {
+    "E01": [
+      {
+        "claim": "仅退款审核通过后无需寄回商品。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-004",
+            "quote": "仅退款申请审核通过后，无需寄回商品，退款将在一个工作日内原路退回。"
+          }
+        ]
+      },
+      {
+        "claim": "仅退款审核通过后一个工作日内原路退款。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-004",
+            "quote": "仅退款申请审核通过后，无需寄回商品，退款将在一个工作日内原路退回。"
+          }
+        ]
+      }
+    ],
+    "E02": [
+      {
+        "claim": "定制商品不支持无理由退货。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-002",
+            "quote": "定制商品不支持无理由退货。"
+          }
+        ]
+      },
+      {
+        "claim": "定制商品有质量问题时可以申请售后。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-002",
+            "quote": "但存在商品质量问题时，可以申请售后，由客服核实后确定处理方式。"
+          }
+        ]
+      },
+      {
+        "claim": "具体处理方式由客服核实后确定。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-002",
+            "quote": "但存在商品质量问题时，可以申请售后，由客服核实后确定处理方式。"
+          }
+        ]
+      },
+      {
+        "claim": "因质量问题退货时，退货运费由商家承担。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-003",
+            "quote": "因商品质量问题退货，由商家承担退货运费。"
+          }
+        ]
+      },
+      {
+        "claim": "损坏原因不明确时，应先核实原因再判断运费承担方。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-003",
+            "quote": "损坏原因不明确时，应先核实原因，再判断运费承担方。"
+          }
+        ]
+      }
+    ],
+    "I01": [
+      {
+        "claim": "申请企业电子发票需要订单编号。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-001",
+            "quote": "申请时需要提供订单编号、发票抬头；企业发票还需要提供企业税号。"
+          }
+        ]
+      },
+      {
+        "claim": "申请企业电子发票需要发票抬头。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-001",
+            "quote": "申请时需要提供订单编号、发票抬头；企业发票还需要提供企业税号。"
+          }
+        ]
+      },
+      {
+        "claim": "申请企业电子发票还需要企业税号。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-001",
+            "quote": "申请时需要提供订单编号、发票抬头；企业发票还需要提供企业税号。"
+          }
+        ]
+      }
+    ],
+    "I02": [
+      {
+        "claim": "电子发票在申请后七个工作日内发送。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-002",
+            "quote": "电子发票将在申请后七个工作日内发送到申请人填写的邮箱。"
+          }
+        ]
+      },
+      {
+        "claim": "电子发票发送到申请人填写的邮箱。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-002",
+            "quote": "电子发票将在申请后七个工作日内发送到申请人填写的邮箱。"
+          }
+        ]
+      },
+      {
+        "claim": "七个工作日是发票发送时限，不是退款到账时限。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-002",
+            "quote": "七个工作日是发票发送时限，不是退款到账时限。"
+          }
+        ]
+      }
+    ],
+    "I03": [
+      {
+        "claim": "发票已开具时，不能承诺立即修改抬头。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-003",
+            "quote": "发票已经开具时，需要联系客服核实是否能够作废并重新开具，不能承诺立即修改。"
+          }
+        ]
+      },
+      {
+        "claim": "已开发票需要联系客服核实能否作废并重新开具。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-003",
+            "quote": "发票已经开具时，需要联系客服核实是否能够作废并重新开具，不能承诺立即修改。"
+          }
+        ]
+      }
+    ],
+    "I04": [
+      {
+        "claim": "仅退款审核通过后无需寄回商品。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-004",
+            "quote": "仅退款申请审核通过后，无需寄回商品，退款将在一个工作日内原路退回。"
+          }
+        ]
+      },
+      {
+        "claim": "仅退款审核通过后一个工作日内原路退款。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-004",
+            "quote": "仅退款申请审核通过后，无需寄回商品，退款将在一个工作日内原路退回。"
+          }
+        ]
+      },
+      {
+        "claim": "电子发票在申请后七个工作日内发送。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-002",
+            "quote": "电子发票将在申请后七个工作日内发送到申请人填写的邮箱。"
+          }
+        ]
+      },
+      {
+        "claim": "电子发票发送到申请人填写的邮箱。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-002",
+            "quote": "电子发票将在申请后七个工作日内发送到申请人填写的邮箱。"
+          }
+        ]
+      },
+      {
+        "claim": "七个工作日是发票发送时限，不是退款到账时限。",
+        "verdict": "supported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-002",
+            "quote": "七个工作日是发票发送时限，不是退款到账时限。"
+          }
+        ]
+      }
+    ]
+  },
+  "negative_control": {
+    "base_case": "I04",
+    "answer": "仅退款申请审核通过后，退款将在七个工作日内原路退回。[return_policy_v1-004] 电子发票将在申请后一个工作日内发送。[invoice_policy_v1-002]",
+    "claims": [
+      {
+        "claim": "仅退款审核通过后七个工作日内原路退款。",
+        "verdict": "unsupported",
+        "evidence": [
+          {
+            "id": "return_policy_v1-004",
+            "quote": "仅退款申请审核通过后，无需寄回商品，退款将在一个工作日内原路退回。"
+          }
+        ]
+      },
+      {
+        "claim": "电子发票在申请后一个工作日内发送。",
+        "verdict": "unsupported",
+        "evidence": [
+          {
+            "id": "invoice_policy_v1-002",
+            "quote": "电子发票将在申请后七个工作日内发送到申请人填写的邮箱。"
+          }
+        ]
+      }
+    ]
+  }
+}
